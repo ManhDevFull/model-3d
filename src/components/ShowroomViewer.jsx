@@ -28,12 +28,12 @@ import {
 } from 'three';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 
-import carModelUrl from '../../2021_mercedes-benz_s-class_maybach.glb?url';
+import { MODEL_LIBRARY } from '../data/modelCatalog';
 
 const DEFAULT_SCHEME = {
-  mode: 'duotone',
-  primary: '#d9d7d2',
-  secondary: '#0d0f13',
+  mode: 'single',
+  primary: '#6d4935',
+  secondary: '#6d4935',
 };
 
 const STAGE_ROTATION = -0.58;
@@ -46,6 +46,14 @@ const CAMERA_POSITION = [3, 2, 5];
 const CAMERA_FOV = 23;
 const CONTROL_TARGET = [0, 1, 0];
 const MODEL_TARGET_LENGTH = 5.85;
+const DEFAULT_PAINT_PROFILE = {
+  topStart: 0.48,
+  topEnd: 0.64,
+  hoodStart: 0.36,
+  hoodEnd: 0.08,
+  hoodHeightStart: 0.22,
+  hoodHeightEnd: 0.4,
+};
 const DEFAULT_LAYOUT = {
   platformWidth: 2.6,
   platformDepth: 5.8,
@@ -66,7 +74,7 @@ const trimColor = new Color('#1a1512');
 const chromeWarmth = new Color('#d9b77d');
 const paintBase = new Color('#ffffff');
 
-const ShowroomViewer = memo(function ShowroomViewer({ onReady }) {
+const ShowroomViewer = memo(function ShowroomViewer({ activeModel, onReady }) {
   const stageApiRef = useRef(null);
   const queuedSchemeRef = useRef(DEFAULT_SCHEME);
   const appliedSchemeRef = useRef(null);
@@ -115,13 +123,13 @@ const ShowroomViewer = memo(function ShowroomViewer({ onReady }) {
           gl.toneMappingExposure = 1.05;
         }}
       >
-        <ShowroomScene onReady={registerStageApi} />
+        <ShowroomScene activeModel={activeModel} onReady={registerStageApi} />
       </Canvas>
     </div>
   );
 });
 
-function ShowroomScene({ onReady }) {
+function ShowroomScene({ activeModel, onReady }) {
   const cameraRef = useRef(null);
   const controlsRef = useRef(null);
   const [layout, setLayout] = useState(DEFAULT_LAYOUT);
@@ -237,7 +245,7 @@ function ShowroomScene({ onReady }) {
       <group rotation={[0, STAGE_ROTATION, 0]}>
         <DisplayPedestal layout={layout} />
         <Suspense fallback={<Loader />}>
-          <CarStage onReady={registerCarStage} />
+          <CarStage activeModel={activeModel} onReady={registerCarStage} />
         </Suspense>
       </group>
 
@@ -268,10 +276,13 @@ function ShowroomScene({ onReady }) {
   );
 }
 
-function CarStage({ onReady }) {
-  const { scene } = useGLTF(carModelUrl);
+function CarStage({ activeModel, onReady }) {
+  const { scene } = useGLTF(activeModel.file);
 
-  const preparedStage = useMemo(() => prepareCarStage(scene), [scene]);
+  const preparedStage = useMemo(
+    () => prepareCarStage(scene, activeModel),
+    [activeModel, scene],
+  );
 
   useEffect(() => {
     const carStageApi = {
@@ -371,7 +382,7 @@ function Loader() {
   );
 }
 
-function prepareCarStage(sourceScene) {
+function prepareCarStage(sourceScene, activeModel) {
   const model = clone(sourceScene);
   const junkNodes = [];
   const paintMaterials = [];
@@ -390,7 +401,12 @@ function prepareCarStage(sourceScene) {
       : [child.material];
 
     const clonedMaterials = sourceMaterials.map((sourceMaterial) =>
-      prepareMaterial(sourceMaterial, child.name ?? '', paintMaterials),
+      prepareMaterial(
+        sourceMaterial,
+        child.name ?? '',
+        activeModel,
+        paintMaterials,
+      ),
     );
 
     child.material = Array.isArray(child.material)
@@ -404,7 +420,7 @@ function prepareCarStage(sourceScene) {
     child.parent?.remove(child);
   });
 
-  const layout = fitModelToStage(model);
+  const layout = fitModelToStage(model, activeModel);
   paintMaterials.forEach((material) => {
     configurePaintMask(material, layout.paintMask);
   });
@@ -416,7 +432,7 @@ function prepareCarStage(sourceScene) {
   };
 }
 
-function prepareMaterial(sourceMaterial, nodeName, paintMaterials) {
+function prepareMaterial(sourceMaterial, nodeName, activeModel, paintMaterials) {
   if (!sourceMaterial?.clone) {
     return sourceMaterial;
   }
@@ -433,7 +449,7 @@ function prepareMaterial(sourceMaterial, nodeName, paintMaterials) {
     return material;
   }
 
-  if (isPaintNode(nodeName, materialName)) {
+  if (isPaintNode(nodeName, materialName, activeModel)) {
     material.color?.copy(paintBase);
     material.emissive?.set('#0f0c0a');
     material.emissiveIntensity = 0.04;
@@ -467,7 +483,7 @@ function prepareMaterial(sourceMaterial, nodeName, paintMaterials) {
   return material;
 }
 
-function fitModelToStage(model) {
+function fitModelToStage(model, activeModel) {
   const rawBox = new Box3().setFromObject(model);
   const rawSize = rawBox.getSize(new Vector3());
   const rawCenter = rawBox.getCenter(new Vector3());
@@ -475,18 +491,20 @@ function fitModelToStage(model) {
   model.position.sub(rawCenter);
 
   const footprintLongestSide = Math.max(rawSize.x, rawSize.z);
-  const scaleFactor = MODEL_TARGET_LENGTH / footprintLongestSide;
+  const scaleFactor =
+    (activeModel?.targetLength ?? MODEL_TARGET_LENGTH) / footprintLongestSide;
 
   model.scale.setScalar(scaleFactor);
   model.updateMatrixWorld(true);
 
   const groundedBox = new Box3().setFromObject(model);
   model.position.y -= groundedBox.min.y;
-  model.position.y += 0.2;
+  model.position.y += 0.22;
   model.updateMatrixWorld(true);
 
   const finalBox = new Box3().setFromObject(model);
   const finalSize = finalBox.getSize(new Vector3());
+  const paintProfile = activeModel?.paintProfile ?? DEFAULT_PAINT_PROFILE;
 
   const platformWidth = Math.max(finalSize.x * 1.16, 2.8);
   const platformDepth = Math.max(finalSize.z * 1.16, 6.2);
@@ -503,12 +521,14 @@ function fitModelToStage(model) {
     shadowScale: Math.max(platformWidth, platformDepth) * 1.02,
     shadowY: -0.018,
     paintMask: {
-      topStart: finalBox.min.y + finalSize.y * 0.48,
-      topEnd: finalBox.min.y + finalSize.y * 0.64,
-      hoodStart: finalBox.max.z - finalSize.z * 0.36,
-      hoodEnd: finalBox.max.z - finalSize.z * 0.08,
-      hoodHeightStart: finalBox.min.y + finalSize.y * 0.22,
-      hoodHeightEnd: finalBox.min.y + finalSize.y * 0.4,
+      topStart: finalBox.min.y + finalSize.y * paintProfile.topStart,
+      topEnd: finalBox.min.y + finalSize.y * paintProfile.topEnd,
+      hoodStart: finalBox.max.z - finalSize.z * paintProfile.hoodStart,
+      hoodEnd: finalBox.max.z - finalSize.z * paintProfile.hoodEnd,
+      hoodHeightStart:
+        finalBox.min.y + finalSize.y * paintProfile.hoodHeightStart,
+      hoodHeightEnd:
+        finalBox.min.y + finalSize.y * paintProfile.hoodHeightEnd,
     },
   };
 }
@@ -519,13 +539,62 @@ function applyPaintSchemeToMaterials(paintMaterials, nextScheme) {
   });
 }
 
-function isPaintNode(nodeName, materialName) {
+function isPaintNode(nodeName, materialName, activeModel) {
+  const normalizedNodeName = nodeName.toLowerCase();
+  const normalizedMaterialName = materialName.toLowerCase();
+
+  if (
+    normalizedNodeName.includes('plastic') ||
+    normalizedNodeName.includes('interior') ||
+    normalizedMaterialName.includes('interior')
+  ) {
+    return false;
+  }
+
+  if (
+    matchesModelPaintSelector(
+      activeModel?.paintSelectors,
+      normalizedNodeName,
+      normalizedMaterialName,
+    )
+  ) {
+    return true;
+  }
+
   return (
     nodeName.includes('CarPaint') ||
+    normalizedNodeName.includes('paint') ||
+    normalizedMaterialName.includes('paint') ||
+    normalizedMaterialName.includes('car_paint') ||
+    normalizedNodeName.includes('car_paint') ||
+    normalizedNodeName.startsWith('body') ||
+    normalizedNodeName.startsWith('hood') ||
+    normalizedNodeName.startsWith('door') ||
     materialName === 'Mphong4SG1' ||
     materialName === 'Mphong5SG1' ||
     materialName === 'Mphong6SG1'
   );
+}
+
+function matchesModelPaintSelector(
+  paintSelectors,
+  normalizedNodeName,
+  normalizedMaterialName,
+) {
+  if (!paintSelectors) {
+    return false;
+  }
+
+  const materialNames = paintSelectors.materialNames ?? [];
+  const nodeNameIncludes = paintSelectors.nodeNameIncludes ?? [];
+  const matchesMaterial =
+    materialNames.length === 0 ||
+    materialNames.includes(normalizedMaterialName);
+  const matchesNode =
+    nodeNameIncludes.length === 0 ||
+    nodeNameIncludes.some((token) => normalizedNodeName.includes(token));
+
+  return matchesMaterial && matchesNode;
 }
 
 function isTrimNode(nodeName) {
@@ -721,6 +790,8 @@ function areSchemesEqual(left, right) {
   );
 }
 
-useGLTF.preload(carModelUrl);
+MODEL_LIBRARY.forEach((model) => {
+  useGLTF.preload(model.file);
+});
 
 export default ShowroomViewer;

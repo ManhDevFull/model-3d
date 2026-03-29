@@ -1,0 +1,188 @@
+export const MODEL_LIBRARY = [
+  {
+    id: 'maybach-s-class',
+    file: '/models/2021_mercedes-benz_s-class_maybach.glb',
+    badge: 'Executive Suite',
+    brand: 'Mercedes-Maybach',
+    title: 'S-Class 2021',
+    cardTitle: 'Maybach S-Class',
+    descriptor: 'Long-wheelbase limousine',
+    headline:
+      'A ceremonial flagship limousine with a long, formal silhouette and a body shape that suits two-tone paint studies.',
+    stats: [
+      { value: '2021', label: 'Flagship Year' },
+      { value: 'Maybach', label: 'Coachbuilt Mood' },
+      { value: 'Limousine', label: 'Body Type' },
+    ],
+    highlights: [
+      'Long-wheelbase proportions and a high glasshouse make the upper-body two-tone split read clearly.',
+      'Chrome-heavy front fascia and upright grille respond well to studio reflections and neutral material preview light.',
+      'The interior remains visible through the greenhouse, so cinematic framing still feels like a collector presentation.',
+    ],
+    paintProfile: {
+      topStart: 0.48,
+      topEnd: 0.64,
+      hoodStart: 0.36,
+      hoodEnd: 0.08,
+      hoodHeightStart: 0.22,
+      hoodHeightEnd: 0.4,
+    },
+  },
+  {
+    id: 'audi-rs7-keyvany',
+    file: '/models/audi_rs7_keyvany_free.glb',
+    badge: 'Gallery Spec',
+    brand: 'Audi',
+    title: 'RS7 Keyvany',
+    cardTitle: 'Audi RS7',
+    descriptor: 'Sportback with tuned aero',
+    headline:
+      'A low fastback silhouette with a sharper shoulder line and a more aggressive aero package for paint and surfacing review.',
+    stats: [
+      { value: 'RS7', label: 'Performance Base' },
+      { value: 'Keyvany', label: 'Aero Theme' },
+      { value: 'Sportback', label: 'Body Type' },
+    ],
+    highlights: [
+      'Wide haunches and a long hood benefit from a stable camera and fixed stage ratio when you switch models.',
+      'Gloss highlights emphasize the fastback roof and stretched side surfacing under the same cinematic viewer frame.',
+      'The model selector keeps the overall showroom layout locked while the vehicle changes underneath.',
+    ],
+    paintProfile: {
+      topStart: 0.54,
+      topEnd: 0.72,
+      hoodStart: 0.42,
+      hoodEnd: 0.14,
+      hoodHeightStart: 0.16,
+      hoodHeightEnd: 0.34,
+    },
+    paintSelectors: {
+      materialNames: ['material'],
+      nodeNameIncludes: [
+        'threshold',
+        'rear_end',
+        'front_fender',
+        'front_bumper',
+        'beack_bumper',
+      ],
+    },
+  },
+  {
+    id: 'audi-rs7-sportback',
+    file: '/models/2020_audi_rs7_sportback.glb',
+    badge: 'Factory Line',
+    brand: 'Audi',
+    title: 'RS7 Sportback 2020',
+    cardTitle: 'Audi RS7 Sportback',
+    descriptor: 'Grand tourer sportback',
+    headline:
+      'A cleaner OEM RS7 silhouette with a long hood, fastback roof and softer surfacing than the tuned Keyvany build.',
+    stats: [
+      { value: '2020', label: 'Model Year' },
+      { value: 'RS7', label: 'Performance Base' },
+      { value: 'Sportback', label: 'Body Type' },
+    ],
+    highlights: [
+      'The stock body gives a calmer reference point when comparing reflections and paint against the more aggressive aero builds.',
+      'Long side surfaces and the sloping roofline read well inside the same fixed cinematic stage.',
+      'A factory-spec silhouette makes color review feel closer to an OEM configurator than a modified showcase.',
+    ],
+    paintProfile: {
+      topStart: 0.54,
+      topEnd: 0.72,
+      hoodStart: 0.42,
+      hoodEnd: 0.14,
+      hoodHeightStart: 0.16,
+      hoodHeightEnd: 0.34,
+    },
+  },
+  {
+    id: 'bmw-m4-adro',
+    file: '/models/2022_bmw_g82_m4_adro_carbon_fiber_widebody_kit.glb',
+    badge: 'Carbon Program',
+    brand: 'BMW',
+    title: 'G82 M4 Adro',
+    cardTitle: 'BMW G82 M4',
+    descriptor: 'Widebody coupe study',
+    headline:
+      'A track-biased coupe with added carbon surfaces and a more technical body kit, useful for checking how paint and carbon sit together.',
+    stats: [
+      { value: '2022', label: 'Model Year' },
+      { value: 'Adro', label: 'Widebody Kit' },
+      { value: 'Coupe', label: 'Body Type' },
+    ],
+    highlights: [
+      'The viewer keeps the same pedestal ratio, so the wider kit still reads correctly without pushing the UI around.',
+      'Carbon-heavy sections benefit from the brighter material-preview reflections and neutral grey environment.',
+      'A fixed cinematic frame makes it easier to compare paint and aero between this build and the others.',
+    ],
+    paintProfile: {
+      topStart: 0.56,
+      topEnd: 0.74,
+      hoodStart: 0.44,
+      hoodEnd: 0.16,
+      hoodHeightStart: 0.17,
+      hoodHeightEnd: 0.35,
+    },
+  },
+  {
+    id: 'porsche-911-gt3-touring',
+    file: '/models/2022_porsche_911_gt3_touring_992.glb',
+    badge: 'Touring Study',
+    brand: 'Porsche',
+    title: '911 GT3 Touring 2022',
+    cardTitle: 'Porsche 911 GT3 Touring',
+    descriptor: '992 grand touring coupe',
+    headline:
+      'A subtler 992 silhouette that trades the dramatic rear wing for a cleaner road-focused profile while keeping the same motorsport stance.',
+    stats: [
+      { value: '2022', label: 'Model Year' },
+      { value: 'GT3 Touring', label: 'Variant' },
+      { value: '992', label: 'Generation' },
+    ],
+    highlights: [
+      'The Touring body gives a smoother comparison point beside the GT3 RS without breaking the fixed showroom framing.',
+      'Rounded fenders and a cleaner decklid make studio reflections travel more evenly across the bodywork.',
+      'This variant works well for premium product-review layouts because the shape stays expressive without overly large aero elements.',
+    ],
+    paintProfile: {
+      topStart: 0.58,
+      topEnd: 0.76,
+      hoodStart: 0.46,
+      hoodEnd: 0.18,
+      hoodHeightStart: 0.17,
+      hoodHeightEnd: 0.34,
+    },
+  },
+  {
+    id: 'porsche-911-gt3-rs',
+    file: '/models/2023_porsche_911_gt3_rs_2.7_carrera_tribute_992.glb',
+    badge: 'Track Homage',
+    brand: 'Porsche',
+    title: '911 GT3 RS 2023',
+    cardTitle: 'Porsche 911 GT3 RS',
+    descriptor: '992 tribute edition',
+    headline:
+      'A shorter and more upright track-focused profile, framed inside the same gallery stage so model changes feel curated instead of chaotic.',
+    stats: [
+      { value: '2023', label: 'Model Year' },
+      { value: 'GT3 RS', label: 'Track Focus' },
+      { value: '992', label: 'Generation' },
+    ],
+    highlights: [
+      'Shorter overhangs and taller rear aero are normalized to the same stage ratio so the switch stays visually consistent.',
+      'The brighter reflections help the curved fenders and race-derived surfacing read more clearly in still view.',
+      'The fixed layout preserves a premium gallery feel even when moving between four very different silhouettes.',
+    ],
+    paintProfile: {
+      topStart: 0.58,
+      topEnd: 0.76,
+      hoodStart: 0.46,
+      hoodEnd: 0.18,
+      hoodHeightStart: 0.17,
+      hoodHeightEnd: 0.34,
+    },
+  },
+];
+
+export const DEFAULT_MODEL_ID = MODEL_LIBRARY[0].id;
